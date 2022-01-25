@@ -59,7 +59,7 @@ def sort_docs(path, base_path=None):
                     folder_to_move = k
                     break
 
-            move_file_to_path =  f"{base_path}/{folder_to_move}/{item}"
+            move_file_to_path = f"{base_path}/{folder_to_move}/{item}"
 
             if folder_to_move == "archives":
 
@@ -83,11 +83,11 @@ def sort_docs(path, base_path=None):
 
         while (not os.listdir(item_path)) and item not in FOLDERS:
 
-                shutil.rmtree(item_path)
-                item_path = os.path.dirname(item_path)
+            shutil.rmtree(item_path)
+            item_path = os.path.dirname(item_path)
 
 
 if __name__ == "__main__":
-    
+
     create_sorted_folders("./Хлам")
     sort_docs("./Хлам")
