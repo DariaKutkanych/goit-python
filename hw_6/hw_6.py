@@ -90,7 +90,7 @@ def sort_docs(path, base_path=None):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
 
         create_sorted_folders(sys.argv[1])
         sort_docs(sys.argv[1])
