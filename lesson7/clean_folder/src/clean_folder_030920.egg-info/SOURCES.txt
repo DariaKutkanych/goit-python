@@ -1,0 +1,12 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+src/clean_folder/__init__.py
+src/clean_folder/clean.py
+src/clean_folder/command_line.py
+src/clean_folder_030920.egg-info/PKG-INFO
+src/clean_folder_030920.egg-info/SOURCES.txt
+src/clean_folder_030920.egg-info/dependency_links.txt
+src/clean_folder_030920.egg-info/entry_points.txt
+src/clean_folder_030920.egg-info/top_level.txt

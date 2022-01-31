@@ -1,0 +1,1 @@
+This script unpacks and sorts a folder according to its type.

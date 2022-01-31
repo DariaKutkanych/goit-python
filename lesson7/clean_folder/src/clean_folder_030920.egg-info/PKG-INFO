@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: clean-folder-030920
+Version: 1.0.0
+Summary: Folder sorting package
+Author: Daria Kutkanych
+Author-email: d.goubenko@gmail.com
+License: MIT
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+This script unpacks and sorts a folder according to its type.
+
