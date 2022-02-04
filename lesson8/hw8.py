@@ -4,8 +4,6 @@ import random
 import sys
 
 
-
-
 def random_employee_list(num):
 
     NAMES_LIST = ['Oliver', 'Jake', 'Noah', 'James', 'Jack', 'Connor', 'Liam',
