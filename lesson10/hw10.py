@@ -8,7 +8,7 @@ class AddressBook(UserDict):
         if self.data.get(record.name.value):
             print(f"User name {record.name.value} already exists")
         else:
-            self.data[record.name.value] = Record
+            self.data[record.name.value] = record
             print(f"User {record.name.value} successfully added")
 
 
