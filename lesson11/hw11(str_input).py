@@ -3,10 +3,31 @@ from datetime import datetime
 import re
 
 
+def arg_check(arg):
+
+    date_form = re.sub("[- //]", ".", arg)
+    
+    try:
+        data = datetime.strptime(date_form, "%d.%m.%Y")
+        return data
+    
+    except ValueError:
+        pass
+    
+    # phone light check
+    test1 = 20 > len(arg) >= 10
+    test2 = next(filter(lambda x: x.isalpha() or x in [".", ",","="], arg), False)
+    
+    if test1 and (not test2):
+        return "phone"
+    else:
+        return "other"
+
+
 class AddressBook(UserDict):
 
     def __init__(self):
-
+        
         super().__init__()
         self.max_number = 0
         self.current_records = 0
@@ -14,8 +35,7 @@ class AddressBook(UserDict):
     def __next__(self):
 
         if len(self.data.items()) > self.current_records:
-            display_piece = list(self.data.items())[
-                self.current_records:self.current_records + self.max_number]
+            display_piece = list(self.data.items())[self.current_records:self.current_records + self.max_number]
             self.current_records = self.current_records + self.max_number
 
             return display_piece
@@ -34,13 +54,14 @@ class AddressBook(UserDict):
             self.data[record.name.value] = record
             print(f"User {record.name.value} successfully added")
 
+    
     def iterator(self, number):
         self.max_number = number
-
+        
         for rec in self:
             print(rec)
             return rec
-
+                
 
 class Field:
 
@@ -53,7 +74,7 @@ class Field:
     @property
     def value(self):
         return self.__value
-
+    
     @value.setter
     def value(self, value):
         self.__value = value
@@ -67,34 +88,30 @@ class Phone(Field):
 
     def __init__(self, value):
         super().__init__(value)
-        self.__value = None
-        self.value = value
-
+        self.__value = value
+    
     def __repr__(self):
         return f"{self.__value}"
 
     @property
     def value(self):
         return self.__value
-
+    
     @value.setter
     def value(self, value):
-        test1 = 20 > len(value) >= 10
-        test2 = next(filter(lambda x: x.isalpha() or x in [
-                     ".", ",", "="], value), False)
-
-        if test1 and (not test2):
+    
+        if arg_check(value) == "phone":
             self.__value = value
+        
         else:
-            print("Wrong data format")
+            print("Wrong number format")
 
 
 class Birthday(Field):
 
     def __init__(self, value):
         super().__init__(value)
-        self.__value = None
-        self.value = value
+        self.__value = value
 
     def __repr__(self):
         return f"{self.__value}"
@@ -105,50 +122,54 @@ class Birthday(Field):
 
     @value.setter
     def value(self, value):
-        date_form = re.sub("[- //]", ".", value)
 
-        try:
-            bd = datetime.strptime(date_form, "%d.%m.%Y").date()
-            self.__value = bd
+        if arg_check(value) == "birthday":
+            self.__value = value
 
-        except ValueError:
+        else:
             print("Wrong birthday format")
-
 
 class Record:
 
-    def __init__(self, name, phones=[], birthday=None):
+    def __init__(self, name, *args):
 
-        self.name = name
-        self.phone_nums = [phone for phone in phones if phone.value != None]
+        self.name = Name(name)
+        self.phone_nums = []
+        self.birthday = None
 
-        if birthday and (birthday.value != None):
-            self.birthday = birthday
-        else:
-            self.birthday = None
+        if args:
+            for arg in args:
+                if arg_check(arg) == "phone":
+                    self.phone_nums.append(Phone(arg))
+                elif isinstance(arg_check(arg), datetime):
+                    if self.birthday:
+                        raise ValueError("Several dates in one record")
+                    else:
+                        self.birthday = Birthday(arg_check(arg).date())
+                else:
+                    print(type(arg))
+                    print(f"{arg} is not a correct value, please check your data")
+                    raise ValueError("Incorrect data type")
 
     def __repr__(self):
         return f"{self.name}: {self.phone_nums}, {self.birthday}"
 
-    def add_phone(self, phone):
+    def add_phone(self, value):
 
-        if phone.value:
-            num = next(filter(lambda x: x.value ==
-                              phone.value, self.phone_nums), None)
-            if num:
-                print("Number already registered")
-            else:
-                self.phone_nums.append(phone)
-                print(
-                    f"Phone {phone.value} for {self.name.value} successfully added")
+        num = next(filter(lambda x: x.value == value, self.phone_nums), None)
+
+        if num:
+            print("Number already registered")
         else:
-            print("Wrong format")
+            if arg_check(value) == "phone":
+                self.phone_nums.append(Phone(value))
+                print(f"Phone {value} for {self.name.value} successfully added")
+            else:
+                print("Wrong phone format")
 
-    def del_phone(self, phone):
-
-        num = next(filter(lambda x: x.value ==
-                   phone.value, self.phone_nums), None)
-
+    def del_phone(self, value):
+        num = next(filter(lambda x: x.value == value, self.phone_nums), None)
+        
         if num:
             print(f"Phone {num.value} removed")
             self.phone_nums.remove(num)
@@ -156,17 +177,17 @@ class Record:
         else:
             print("Number not registered")
 
-    def change_phone(self, ph1, ph2):
+    def change_phone(self, value1, value2):
 
         new_num_check = next(
-            filter(lambda x: x.value == ph2.value, self.phone_nums), None)
+            filter(lambda x: x.value == value2, self.phone_nums), None)
         old_num = next(filter(lambda x: x.value ==
-                       ph1.value, self.phone_nums), None)
+                       value1, self.phone_nums), None)
 
         if not new_num_check and old_num:
-            self.phone_nums.append(ph2)
-            self.phone_nums.remove(old_num)
-            print(f"Number successfully changed to {ph2.value}")
+            old_num.value = value2
+            if old_num.value == value2:
+                print(f"Number successfully changed to {value2}")
 
         else:
             print("Number not registered or a new number already exists")
@@ -179,7 +200,7 @@ class Record:
 
             if cur_day > cur_bd_year:
                 cur_bd_year = cur_bd_year.replace(year=cur_day.year+1)
-
+            
             days_left = (cur_bd_year - cur_day).days
 
             print(f"{days_left} days to your next birthday")
@@ -191,47 +212,24 @@ class Record:
 if __name__ == "__main__":
 
     Book1 = AddressBook()
+    rec1 = Record("Dasha", "0969459910", "30.03.1995", "0969409910")
 
-    name1 = Name("Dasha")
-    name2 = Name("Masha")
-    name3 = Name("Sasha")
-    name4 = Name("Pasha")
-    name5 = Name("Kasha")
-    name6 = Name("Bob")
-    name7 = Name("Rob")
+    rec2 = Record("Masha", "12/12/1995")
+    rec3 = Record("Bob", "0669459910")
+    rec4 = Record("Pasha", "0576783827")
+    rec5 = Record("Sasha", "0669459910")
+    rec6 = Record("Rob", "04567838747")
+    rec7 = Record("Peter", "0586843675")
 
-    p1 = Phone("0969459910")
-    p2 = Phone("694510")
-    p3 = Phone("+380969459910")
-    p4 = Phone("0969459910")
-    p5 = Phone("0969459910")
-    p6 = Phone("0969459911")
-    p7 = Phone("0fmglr459910")
-    p8 = Phone("67583786994")
+    rec1.add_phone("67583786994")
+    rec1.add_phone("67583786994")
 
-    bd1 = Birthday("28.12.1995")
-    bd2 = Birthday("28.11.1985")
-    bd3 = Birthday("28/11/1985")
-    bd4 = Birthday("31/02/1985")
-
-    rec1 = Record(name1, [p1, p2, p3],  bd1)
-
-    rec2 = Record(name2, [p2], bd4,)
-    rec3 = Record(name3, birthday=bd3)
-    rec4 = Record(name4, phones=[p4])
-    rec5 = Record(name5, phones=[p7])
-    rec6 = Record(name6, [p2], bd2)
-    rec7 = Record(name7, [p2], bd2, )
-    rec8 = Record(name1, [p2, p1, p3], bd4)
-
-    rec1.add_phone(p8)
-    rec1.add_phone(p8)
-
-    rec1.change_phone(p8, p6)
-    rec1.change_phone(p3, p6)
-    rec1.add_phone(p2)
-    rec1.del_phone(p4)
-    rec1.del_phone(p1)
+    rec1.change_phone("67583786994", "09674736465")
+    rec1.change_phone("8965978576", "0kfkld09589697504")
+    rec1.add_phone("000")
+    rec1.change_phone("09674736465", "000")
+    rec1.del_phone("00000")
+    rec1.del_phone("000")
 
     print(rec1.phone_nums)
     print(f"\n-----------------------\n")
